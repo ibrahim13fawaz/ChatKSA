@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>دردشة اجتماعي - تواصل مع الأصدقاء</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p>جاري التحميل...</p>
+    </div>
+
+    <!-- شاشة التسجيل والدخول -->
+    <div id="authScreen" class="auth-screen" style="display: none;">
+        <div class="auth-container">
+            <div class="auth-header">
+                <i class="fas fa-comments"></i>
+                <h1>دردشة اجتماعي</h1>
+                <p>تواصل مع الأصدقاء حول العالم</p>
+            </div>
+            
+            <div id="loginForm" class="auth-form">
+                <h2>تسجيل الدخول</h2>
+                <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" class="auth-input">
+                <input type="password" id="loginPassword" placeholder="كلمة المرور" class="auth-input">
+                <button id="loginBtn" class="auth-btn">دخول</button>
+                <div class="auth-divider">أو</div>
+                <button id="googleLoginBtn" class="auth-btn google-btn">
+                    <i class="fab fa-google"></i> تسجيل الدخول بـ Google
+                </button>
+                <button id="facebookLoginBtn" class="auth-btn facebook-btn">
+                    <i class="fab fa-facebook"></i> تسجيل الدخول بـ Facebook
+                </button>
+                <p class="auth-switch">ليس لديك حساب؟ <a href="#" id="showRegister">إنشاء حساب جديد</a></p>
+            </div>
+            
+            <div id="registerForm" class="auth-form" style="display: none;">
+                <h2>إنشاء حساب</h2>
+                <input type="email" id="registerEmail" placeholder="البريد الإلكتروني" class="auth-input">
+                <input type="password" id="registerPassword" placeholder="كلمة المرور" class="auth-input">
+                <input type="password" id="confirmPassword" placeholder="تأكيد كلمة المرور" class="auth-input">
+                <button id="registerBtn" class="auth-btn">إنشاء حساب</button>
+                <div class="auth-divider">أو</div>
+                <button id="googleRegisterBtn" class="auth-btn google-btn">
+                    <i class="fab fa-google"></i> التسجيل بـ Google
+                </button>
+                <button id="facebookRegisterBtn" class="auth-btn facebook-btn">
+                    <i class="fab fa-facebook"></i> التسجيل بـ Facebook
+                </button>
+                <p class="auth-switch">لديك حساب بالفعل؟ <a href="#" id="showLogin">تسجيل الدخول</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- شاشة إكمال الملف الشخصي -->
+    <div id="completeProfileScreen" class="complete-profile-screen" style="display: none;">
+        <div class="profile-container">
+            <h2>أكمل ملفك الشخصي</h2>
+            <div class="avatar-selection">
+                <div class="avatar-option" data-gender="male">
+                    <i class="fas fa-user-astronaut"></i>
+                    <span>ذكر</span>
+                </div>
+                <div class="avatar-option" data-gender="female">
+                    <i class="fas fa-user-ninja"></i>
+                    <span>أنثى</span>
+                </div>
+            </div>
+            <select id="countrySelect" class="profile-input">
+                <option value="">اختر الدولة</option>
+                <option value="السعودية">🇸🇦 السعودية</option>
+                <option value="مصر">🇪🇬 مصر</option>
+                <option value="الإمارات">🇦🇪 الإمارات</option>
+                <option value="الكويت">🇰🇼 الكويت</option>
+                <option value="قطر">🇶🇦 قطر</option>
+                <option value="عمان">🇴🇲 عمان</option>
+                <option value="البحرين">🇧🇭 البحرين</option>
+                <option value="الأردن">🇯🇴 الأردن</option>
+                <option value="لبنان">🇱🇧 لبنان</option>
+                <option value="العراق">🇮🇶 العراق</option>
+                <option value="فلسطين">🇵🇸 فلسطين</option>
+                <option value="سوريا">🇸🇾 سوريا</option>
+                <option value="المغرب">🇲🇦 المغرب</option>
+                <option value="الجزائر">🇩🇿 الجزائر</option>
+                <option value="تونس">🇹🇳 تونس</option>
+                <option value="ليبيا">🇱🇾 ليبيا</option>
+                <option value="السودان">🇸🇩 السودان</option>
+                <option value="اليمن">🇾🇪 اليمن</option>
+            </select>
+            <input type="text" id="usernameInput" placeholder="اسم المستخدم (فريد)" class="profile-input">
+            <div id="usernameError" class="error-message"></div>
+            <button id="completeProfileBtn" class="profile-btn">متابعة</button>
+        </div>
+    </div>
+
+    <!-- الواجهة الرئيسية للتطبيق -->
+    <div id="appScreen" class="app-screen" style="display: none;">
+        <!-- الشريط الجانبي -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info" onclick="showProfile()">
+                    <img id="sidebarAvatar" class="sidebar-avatar" alt="avatar">
+                    <div>
+                        <div id="sidebarUsername" class="sidebar-username"></div>
+                        <div id="sidebarLevel" class="sidebar-level"></div>
+                    </div>
+                </div>
+                <button id="toggleSidebar" class="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-nav">
+                <button class="nav-btn active" data-view="chat">
+                    <i class="fas fa-comments"></i>
+                    <span>الدردشة</span>
+                </button>
+                <button class="nav-btn" data-view="rooms">
+                    <i class="fas fa-users"></i>
+                    <span>الغرف</span>
+                </button>
+                <button class="nav-btn" data-view="friends">
+                    <i class="fas fa-user-friends"></i>
+                    <span>الأصدقاء</span>
+                </button>
+                <button class="nav-btn" data-view="profile">
+                    <i class="fas fa-user"></i>
+                    <span>الملف الشخصي</span>
+                </button>
+                <button class="nav-btn" data-view="search">
+                    <i class="fas fa-search"></i>
+                    <span>بحث</span>
+                </button>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>تسجيل خروج</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <!-- شاشة الدردشة العامة -->
+            <div id="chatView" class="view active">
+                <div class="chat-header">
+                    <div class="chat-title">
+                        <i class="fas fa-globe"></i>
+                        <span>الغرفة العامة</span>
+                    </div>
+                    <div id="onlineCount" class="online-count">
+                        <i class="fas fa-circle"></i>
+                        <span>0 متصل</span>
+                    </div>
+                </div>
+                
+                <div id="publicMessages" class="messages-container"></div>
+                
+                <div class="chat-input-container">
+                    <button id="emojiBtn" class="emoji-btn">
+                        <i class="far fa-smile-wink"></i>
+                    </button>
+                    <input type="text" id="messageInput" placeholder="اكتب رسالتك..." class="message-input">
+                    <button id="sendMessageBtn" class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div id="emojiPicker" class="emoji-picker" style="display: none;"></div>
+            </div>
+            
+            <!-- شاشة الغرف -->
+            <div id="roomsView" class="view">
+                <div class="rooms-header">
+                    <h2>الغرف الخاصة</h2>
+                    <button id="createRoomBtn" class="create-room-btn">
+                        <i class="fas fa-plus"></i>
+                        غرفة جديدة
+                    </button>
+                </div>
+                <div id="roomsList" class="rooms-list"></div>
+            </div>
+            
+            <!-- شاشة الأصدقاء -->
+            <div id="friendsView" class="view">
+                <div class="friends-header">
+                    <h2>الأصدقاء</h2>
+                    <div class="friends-tabs">
+                        <button class="friends-tab active" data-tab="list">قائمة الأصدقاء</button>
+                        <button class="friends-tab" data-tab="requests">طلبات الصداقة</button>
+                    </div>
+                </div>
+                <div id="friendsList" class="friends-list"></div>
+                <div id="pendingRequests" class="pending-requests" style="display: none;"></div>
+            </div>
+            
+            <!-- شاشة الملف الشخصي -->
+            <div id="profileView" class="view">
+                <div class="profile-header">
+                    <h2>ملفي الشخصي</h2>
+                </div>
+                <div id="userProfile" class="user-profile"></div>
+                <button id="editProfileBtn" class="edit-profile-btn">تعديل الملف الشخصي</button>
+            </div>
+            
+            <!-- شاشة البحث -->
+            <div id="searchView" class="view">
+                <div class="search-header">
+                    <h2>البحث عن مستخدمين</h2>
+                    <div class="search-box">
+                        <input type="text" id="searchUsername" placeholder="اسم المستخدم..." class="search-input">
+                        <button id="searchBtn" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+        
+        <!-- شاشة المحادثة الخاصة -->
+        <div id="privateChatOverlay" class="private-chat-overlay" style="display: none;">
+            <div class="private-chat-container">
+                <div class="private-chat-header">
+                    <div class="private-chat-info">
+                        <img id="privateChatAvatar" class="private-chat-avatar" alt="avatar">
+                        <div>
+                            <div id="privateChatUsername" class="private-chat-username"></div>
+                            <div id="privateTypingIndicator" class="typing-indicator"></div>
+                        </div>
+                    </div>
+                    <button id="closePrivateChat" class="close-chat-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="privateMessages" class="private-messages-container"></div>
+                
+                <div class="chat-input-container">
+                    <button id="privateEmojiBtn" class="emoji-btn">
+                        <i class="far fa-smile-wink"></i>
+                    </button>
+                    <input type="text" id="privateMessageInput" placeholder="اكتب رسالتك..." class="message-input">
+                    <button id="sendPrivateMessageBtn" class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- نموذج إنشاء غرفة -->
+        <div id="createRoomModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>إنشاء غرفة جديدة</h3>
+                <input type="text" id="roomName" placeholder="اسم الغرفة" class="modal-input">
+                <input type="url" id="roomImage" placeholder="رابط صورة الغرفة (اختياري)" class="modal-input">
+                <div class="modal-buttons">
+                    <button id="confirmCreateRoom" class="modal-btn confirm">إنشاء</button>
+                    <button id="cancelCreateRoom" class="modal-btn cancel">إلغاء</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- نموذج تعديل الملف الشخصي -->
+        <div id="editProfileModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>تعديل الملف الشخصي</h3>
+                <textarea id="editBio" placeholder="السيرة الذاتية" class="modal-input" rows="3"></textarea>
+                <div class="modal-buttons">
+                    <button id="saveProfileBtn" class="modal-btn confirm">حفظ</button>
+                    <button id="cancelEditProfile" class="modal-btn cancel">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script src="scripts/chat.js"></script>
+    <script src="scripts/rooms.js"></script>
+    <script src="scripts/friends.js"></script>
+    <script src="scripts/profile.js"></script>
+    <script src="scripts/app.js"></script>
+</body>
+</html>
