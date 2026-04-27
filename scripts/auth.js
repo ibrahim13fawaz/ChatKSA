@@ -1,323 +1,325 @@
-// نظام التسجيل والمصادقة - النسخة المصححة
+// ===============================
+// 🔥 AUTH SYSTEM - FIXED VERSION
+// ===============================
 
-// التحقق من حالة المستخدم
-auth.onAuthStateChanged(async (user) => {
+// تأكد من تعريف Firebase compat في HTML
+// firebase.initializeApp(firebaseConfig)
+
+let currentUser = null;
+let currentUserData = null;
+
+// ===============================
+// 🔧 PROVIDERS
+// ===============================
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+const facebookProvider = new firebase.auth.FacebookAuthProvider();
+
+// ===============================
+// 🔥 HELPERS (FIXED)
+// ===============================
+
+function showLoading() {
+    document.body.classList.add('loading');
+}
+
+function hideLoading() {
+    document.body.classList.remove('loading');
+}
+
+function showError(msg) {
+    alert(msg); // تقدر تستبدلها بتصميم toast
+}
+
+function showSuccess(msg) {
+    alert(msg);
+}
+
+// ===============================
+// 🔄 UI NAVIGATION (FIXED)
+// ===============================
+function showAuthScreen() {
+    document.getElementById('authScreen')?.style && (
+        document.getElementById('authScreen').style.display = 'block'
+    );
+}
+
+function showCompleteProfileScreen() {
+    document.getElementById('profileScreen')?.style && (
+        document.getElementById('profileScreen').style.display = 'block'
+    );
+}
+
+async function initializeApp() {
+    console.log("App initialized");
+    // ضع هنا تشغيل التطبيق الرئيسي
+}
+
+// ===============================
+// 🟢 USER STATUS
+// ===============================
+async function updateUserStatus(uid, online) {
+    try {
+        await firebase.database().ref(`users/${uid}`).update({
+            online: online,
+            lastSeen: firebase.database.ServerValue.TIMESTAMP
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// ===============================
+// 🔍 USERNAME CHECK
+// ===============================
+async function isUsernameUnique(username) {
+    const snapshot = await firebase.database()
+        .ref('users')
+        .orderByChild('username')
+        .equalTo(username)
+        .once('value');
+
+    return !snapshot.exists();
+}
+
+// ===============================
+// 🆔 RANDOM ID
+// ===============================
+function generateRandomId() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// ===============================
+// 🔐 AUTH STATE
+// ===============================
+firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
         currentUser = user;
-        
+
         try {
-            // التحقق من إكمال الملف الشخصي
-            const userDataSnapshot = await database.ref(`users/${user.uid}`).once('value');
-            const userData = userDataSnapshot.val();
-            
-            if (!userData || !userData.profileCompleted) {
-                // لم يكمل الملف الشخصي بعد
+            const snap = await firebase.database()
+                .ref(`users/${user.uid}`)
+                .once('value');
+
+            const data = snap.val();
+
+            if (!data || !data.profileCompleted) {
                 showCompleteProfileScreen();
             } else {
-                currentUserData = userData;
+                currentUserData = data;
                 await initializeApp();
-                hideLoadingScreen();
+                hideLoading();
             }
-        } catch (error) {
-            console.error("خطأ في التحقق من المستخدم:", error);
-            showError("حدث خطأ، حاول مرة أخرى");
-            hideLoadingScreen();
+        } catch (err) {
+            console.error(err);
+            showError("حدث خطأ في تحميل البيانات");
+            hideLoading();
         }
     } else {
         showAuthScreen();
-        hideLoadingScreen();
+        hideLoading();
     }
 });
 
-// تسجيل الدخول بالبريد الإلكتروني
+// ===============================
+// 🔑 LOGIN
+// ===============================
 document.getElementById('loginBtn')?.addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    
-    if (!email) {
-        showError('الرجاء إدخال البريد الإلكتروني');
-        return;
-    }
-    
-    if (!password) {
-        showError('الرجاء إدخال كلمة المرور');
-        return;
-    }
-    
+    const email = document.getElementById('loginEmail')?.value?.trim();
+    const password = document.getElementById('loginPassword')?.value;
+
+    if (!email) return showError('أدخل البريد الإلكتروني');
+    if (!password) return showError('أدخل كلمة المرور');
+
     showLoading();
-    
+
     try {
-        await auth.signInWithEmailAndPassword(email, password);
-        showSuccess('تم تسجيل الدخول بنجاح');
-    } catch (error) {
-        let errorMessage = 'فشل تسجيل الدخول';
-        switch (error.code) {
-            case 'auth/user-not-found':
-                errorMessage = 'البريد الإلكتروني غير مسجل';
-                break;
-            case 'auth/wrong-password':
-                errorMessage = 'كلمة المرور غير صحيحة';
-                break;
-            case 'auth/invalid-email':
-                errorMessage = 'البريد الإلكتروني غير صالح';
-                break;
-            default:
-                errorMessage = error.message;
-        }
-        showError(errorMessage);
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+        showSuccess('تم تسجيل الدخول');
+    } catch (err) {
+        showError(err.message);
     } finally {
         hideLoading();
     }
 });
 
-// إنشاء حساب جديد
+// ===============================
+// 🆕 REGISTER
+// ===============================
 document.getElementById('registerBtn')?.addEventListener('click', async () => {
-    const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    
-    // التحقق من صحة المدخلات
-    if (!email) {
-        showError('الرجاء إدخال البريد الإلكتروني');
-        return;
-    }
-    
-    if (!password) {
-        showError('الرجاء إدخال كلمة المرور');
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        showError('كلمة المرور غير متطابقة');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showError('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-        return;
-    }
-    
+    const email = document.getElementById('registerEmail')?.value?.trim();
+    const password = document.getElementById('registerPassword')?.value;
+    const confirm = document.getElementById('confirmPassword')?.value;
+
+    if (!email) return showError('أدخل البريد');
+    if (!password) return showError('أدخل كلمة المرور');
+    if (password !== confirm) return showError('كلمات المرور غير متطابقة');
+    if (password.length < 6) return showError('كلمة المرور ضعيفة');
+
     showLoading();
-    
+
     try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        showSuccess('تم إنشاء الحساب بنجاح');
-        // سيتم نقله تلقائياً لشاشة إكمال الملف الشخصي
-    } catch (error) {
-        let errorMessage = 'فشل إنشاء الحساب';
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                errorMessage = 'البريد الإلكتروني مستخدم بالفعل';
-                break;
-            case 'auth/invalid-email':
-                errorMessage = 'البريد الإلكتروني غير صالح';
-                break;
-            case 'auth/weak-password':
-                errorMessage = 'كلمة المرور ضعيفة، استخدم 6 أحرف على الأقل';
-                break;
-            default:
-                errorMessage = error.message;
-        }
-        showError(errorMessage);
+        await firebase.auth().createUserWithEmailAndPassword(email, password);
+        showSuccess('تم إنشاء الحساب');
+    } catch (err) {
+        showError(err.message);
     } finally {
         hideLoading();
     }
 });
 
-// تسجيل الدخول بـ Google
+// ===============================
+// 🌍 GOOGLE LOGIN
+// ===============================
 document.getElementById('googleLoginBtn')?.addEventListener('click', async () => {
     showLoading();
     try {
-        const result = await auth.signInWithPopup(googleProvider);
-        showSuccess('تم تسجيل الدخول بنجاح');
-    } catch (error) {
-        console.error("Google login error:", error);
-        showError('فشل تسجيل الدخول بـ Google: ' + error.message);
+        await firebase.auth().signInWithPopup(googleProvider);
+        showSuccess('تم تسجيل الدخول');
+    } catch (err) {
+        showError(err.message);
     } finally {
         hideLoading();
     }
 });
 
-// تسجيل الدخول بـ Facebook
+// ===============================
+// 📘 FACEBOOK LOGIN
+// ===============================
 document.getElementById('facebookLoginBtn')?.addEventListener('click', async () => {
     showLoading();
     try {
-        const result = await auth.signInWithPopup(facebookProvider);
-        showSuccess('تم تسجيل الدخول بنجاح');
-    } catch (error) {
-        console.error("Facebook login error:", error);
-        showError('فشل تسجيل الدخول بـ Facebook: ' + error.message);
+        await firebase.auth().signInWithPopup(facebookProvider);
+        showSuccess('تم تسجيل الدخول');
+    } catch (err) {
+        showError(err.message);
     } finally {
         hideLoading();
     }
 });
 
-// إكمال الملف الشخصي - النسخة المصححة مع تحسينات
+// ===============================
+// 👤 COMPLETE PROFILE (FIXED)
+// ===============================
 document.getElementById('completeProfileBtn')?.addEventListener('click', async () => {
-    const selectedGenderElement = document.querySelector('.avatar-option.selected');
-    const selectedGender = selectedGenderElement?.dataset.gender;
-    const country = document.getElementById('countrySelect').value;
-    let username = document.getElementById('usernameInput').value.trim();
-    
-    // التحقق من صحة البيانات مع رسائل واضحة
-    if (!selectedGender) {
-        showError('❌ الرجاء اختيار الجنس (ذكر/أنثى)');
-        return;
-    }
-    
-    if (!country) {
-        showError('❌ الرجاء اختيار الدولة');
-        return;
-    }
-    
-    if (!username) {
-        showError('❌ الرجاء إدخال اسم المستخدم');
-        return;
-    }
-    
-    if (username.length < 3) {
-        showError('❌ اسم المستخدم يجب أن يكون 3 أحرف على الأقل');
-        return;
-    }
-    
-    if (username.length > 20) {
-        showError('❌ اسم المستخدم يجب أن لا يتجاوز 20 حرف');
-        return;
-    }
-    
-    // التحقق من الأحرف المسموحة
-    const validChars = /^[a-zA-Z0-9_\u0600-\u06FF]+$/;
-    if (!validChars.test(username)) {
-        showError('❌ اسم المستخدم يمكن أن يحتوي فقط على حروف وأرقام و underscore');
-        return;
-    }
-    
+    const selected = document.querySelector('.avatar-option.selected');
+    const gender = selected?.dataset.gender;
+    const country = document.getElementById('countrySelect')?.value;
+    const username = document.getElementById('usernameInput')?.value?.trim();
+
+    if (!gender) return showError('اختر الجنس');
+    if (!country) return showError('اختر الدولة');
+    if (!username) return showError('أدخل اسم المستخدم');
+
+    if (username.length < 3) return showError('اسم المستخدم قصير');
+    if (username.length > 20) return showError('اسم المستخدم طويل');
+
+    const valid = /^[a-zA-Z0-9_\u0600-\u06FF]+$/;
+    if (!valid.test(username)) return showError('اسم غير صالح');
+
     showLoading();
-    
-    // التحقق من اسم المستخدم الفريد
-    const isUnique = await isUsernameUnique(username);
-    if (!isUnique) {
-        showError('❌ اسم المستخدم موجود بالفعل، الرجاء اختيار اسم آخر');
-        document.getElementById('usernameInput').focus();
-        hideLoading();
-        return;
-    }
-    
-    const avatar = selectedGender === 'male' ? '👨' : '👩';
-    const userId = generateRandomId();
-    
-    const userData = {
-        uid: currentUser.uid,
-        username: username,
-        avatar: avatar,
-        gender: selectedGender,
-        country: country,
-        userId: userId,
-        level: 0,
-        xp: 0,
-        online: true,
-        lastSeen: firebase.database.ServerValue.TIMESTAMP,
-        friends: {},
-        requests: {},
-        badges: ['جديد'],
-        profileCompleted: true,
-        canChangeUsername: true,
-        bio: '',
-        dailyXP: {},
-        createdAt: firebase.database.ServerValue.TIMESTAMP
-    };
-    
+
     try {
-        await database.ref(`users/${currentUser.uid}`).set(userData);
-        showSuccess('✅ تم إكمال الملف الشخصي بنجاح! جاري تحويلك للتطبيق...');
-        
-        // تحديث المتغيرات
+        const unique = await isUsernameUnique(username);
+        if (!unique) {
+            hideLoading();
+            return showError('اسم المستخدم مستخدم');
+        }
+
+        const userId = generateRandomId();
+
+        const userData = {
+            uid: currentUser.uid,
+            username,
+            avatar: gender === 'male' ? '👨' : '👩',
+            gender,
+            country,
+            userId,
+            xp: 0,
+            level: 0,
+            online: true,
+            profileCompleted: true,
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        await firebase.database().ref(`users/${currentUser.uid}`).set(userData);
+
         currentUserData = userData;
-        
-        // تأخير بسيط قبل الانتقال
-        setTimeout(async () => {
-            await initializeApp();
-        }, 1500);
-        
-    } catch (error) {
-        console.error("Error completing profile:", error);
-        showError('فشل إكمال الملف الشخصي: ' + error.message);
+
+        showSuccess('تم إكمال الملف');
+
+        setTimeout(() => {
+            initializeApp();
+        }, 1000);
+
+    } catch (err) {
+        showError(err.message);
     } finally {
         hideLoading();
     }
 });
 
-// تسجيل الخروج
+// ===============================
+// 🚪 LOGOUT
+// ===============================
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-    if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-        showLoading();
-        try {
-            if (currentUser) {
-                await updateUserStatus(currentUser.uid, false);
-            }
-            await auth.signOut();
-            showSuccess('تم تسجيل الخروج');
-            // إعادة تعيين المتغيرات
-            currentUser = null;
-            currentUserData = null;
-        } catch (error) {
-            showError('فشل تسجيل الخروج: ' + error.message);
-        } finally {
-            hideLoading();
+    if (!confirm('تسجيل الخروج؟')) return;
+
+    showLoading();
+
+    try {
+        if (currentUser) {
+            await updateUserStatus(currentUser.uid, false);
         }
+
+        await firebase.auth().signOut();
+        currentUser = null;
+        currentUserData = null;
+
+        showSuccess('تم تسجيل الخروج');
+    } catch (err) {
+        showError(err.message);
+    } finally {
+        hideLoading();
     }
 });
 
-// التبديل بين نماذج التسجيل والدخول
+// ===============================
+// 🔁 SWITCH FORMS
+// ===============================
 document.getElementById('showRegister')?.addEventListener('click', (e) => {
     e.preventDefault();
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'block';
-    // مسح الحقول
-    document.getElementById('registerEmail').value = '';
-    document.getElementById('registerPassword').value = '';
-    document.getElementById('confirmPassword').value = '';
 });
 
 document.getElementById('showLogin')?.addEventListener('click', (e) => {
     e.preventDefault();
     document.getElementById('registerForm').style.display = 'none';
     document.getElementById('loginForm').style.display = 'block';
-    // مسح الحقول
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPassword').value = '';
 });
 
-// التحقق المباشر من اسم المستخدم أثناء الكتابة
-let usernameCheckTimeout;
-document.getElementById('usernameInput')?.addEventListener('input', async (e) => {
-    clearTimeout(usernameCheckTimeout);
-    const username = e.target.value.trim();
-    const errorDiv = document.getElementById('usernameError');
-    
-    if (username.length < 3) {
-        errorDiv.textContent = '⚠️ اسم المستخدم يجب أن يكون 3 أحرف على الأقل';
-        errorDiv.style.color = '#f59e0b';
+// ===============================
+// 🔍 LIVE USERNAME CHECK
+// ===============================
+let timeout;
+
+document.getElementById('usernameInput')?.addEventListener('input', (e) => {
+    clearTimeout(timeout);
+
+    const value = e.target.value.trim();
+    const error = document.getElementById('usernameError');
+
+    if (!error) return;
+
+    if (value.length < 3) {
+        error.textContent = 'قصير جداً';
         return;
     }
-    
-    if (username.length > 20) {
-        errorDiv.textContent = '⚠️ اسم المستخدم يجب أن لا يتجاوز 20 حرف';
-        errorDiv.style.color = '#f59e0b';
-        return;
-    }
-    
-    errorDiv.textContent = '🔄 جاري التحقق...';
-    errorDiv.style.color = '#4f46e5';
-    
-    usernameCheckTimeout = setTimeout(async () => {
-        const isUnique = await isUsernameUnique(username);
-        if (!isUnique) {
-            errorDiv.textContent = '❌ اسم المستخدم موجود بالفعل';
-            errorDiv.style.color = '#ef4444';
-        } else {
-            errorDiv.textContent = '✅ اسم المستخدم متاح';
-            errorDiv.style.color = '#10b981';
-        }
-    }, 500);
+
+    error.textContent = 'جاري التحقق...';
+
+    timeout = setTimeout(async () => {
+        const ok = await isUsernameUnique(value);
+        error.textContent = ok ? 'متاح ✅' : 'مستخدم ❌';
+    }, 400);
 });
