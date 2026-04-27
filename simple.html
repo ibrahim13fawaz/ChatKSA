@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>اختبار بسيط</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <h1>اختبار Firebase</h1>
+    <div id="result">جاري الاختبار...</div>
+    
+    <script>
+        // إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXA1x9fJe6zPFo7yiK1kSRsoR89aSff5k",
+            authDomain: "itchat-web-8c4ed.firebaseapp.com",
+            databaseURL: "https://itchat-web-8c4ed-default-rtdb.firebaseio.com",
+            projectId: "itchat-web-8c4ed",
+            storageBucket: "itchat-web-8c4ed.firebasestorage.app",
+            messagingSenderId: "787261764804",
+            appId: "1:787261764804:web:7af9a924d03989b1dbc591"
+        };
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            document.getElementById('result').innerHTML = '✅ Firebase initialized!<br>';
+            
+            const auth = firebase.auth();
+            const database = firebase.database();
+            
+            document.getElementById('result').innerHTML += '✅ Auth and Database ready<br>';
+            document.getElementById('result').innerHTML += '📝 جرب تسجيل الدخول:<br>';
+            document.getElementById('result').innerHTML += `
+                <input type="email" id="email" placeholder="Email"><br>
+                <input type="password" id="password" placeholder="Password"><br>
+                <button onclick="login()">تسجيل الدخول</button>
+                <button onclick="signup()">إنشاء حساب</button>
+                <div id="message"></div>
+            `;
+            
+            window.login = async function() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    document.getElementById('message').innerHTML = '✅ تم تسجيل الدخول!';
+                } catch(e) {
+                    document.getElementById('message').innerHTML = '❌ ' + e.message;
+                }
+            };
+            
+            window.signup = async function() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                try {
+                    await auth.createUserWithEmailAndPassword(email, password);
+                    document.getElementById('message').innerHTML = '✅ تم إنشاء الحساب!';
+                } catch(e) {
+                    document.getElementById('message').innerHTML = '❌ ' + e.message;
+                }
+            };
+            
+        } catch(e) {
+            document.getElementById('result').innerHTML = '❌ خطأ: ' + e.message;
+        }
+    </script>
+</body>
+</html>
