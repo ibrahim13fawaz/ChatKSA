@@ -1,5 +1,4 @@
 // تكوين Firebase - استبدل هذه البيانات بمشروعك الخاص
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCXA1x9fJe6zPFo7yiK1kSRsoR89aSff5k",
   authDomain: "itchat-web-8c4ed.firebaseapp.com",
