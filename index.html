@@ -65,53 +65,53 @@
     </div>
 
     <!-- شاشة إكمال الملف الشخصي -->
-    <!-- شاشة إكمال الملف الشخصي - النسخة المحسنة -->
-<div id="completeProfileScreen" class="complete-profile-screen" style="display: none;">
-    <div class="profile-container">
-        <h2>✨ مرحباً بك!</h2>
-        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
-            أكمل بياناتك للبدء
-        </p>
-        
-        <div class="avatar-selection">
-            <div class="avatar-option" data-gender="male">
-                <i class="fas fa-user-astronaut"></i>
-                <span>ذكر 👨</span>
+    <div id="completeProfileScreen" class="complete-profile-screen" style="display: none;">
+        <div class="profile-container">
+            <h2>✨ مرحباً بك!</h2>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+                أكمل بياناتك للبدء
+            </p>
+            
+            <div class="avatar-selection">
+                <div class="avatar-option" data-gender="male">
+                    <i class="fas fa-user-astronaut"></i>
+                    <span>ذكر 👨</span>
+                </div>
+                <div class="avatar-option" data-gender="female">
+                    <i class="fas fa-user-ninja"></i>
+                    <span>أنثى 👩</span>
+                </div>
             </div>
-            <div class="avatar-option" data-gender="female">
-                <i class="fas fa-user-ninja"></i>
-                <span>أنثى 👩</span>
-            </div>
+            
+            <select id="countrySelect" class="profile-input">
+                <option value="">🌍 اختر الدولة</option>
+                <option value="السعودية">🇸🇦 السعودية</option>
+                <option value="مصر">🇪🇬 مصر</option>
+                <option value="الإمارات">🇦🇪 الإمارات</option>
+                <option value="الكويت">🇰🇼 الكويت</option>
+                <option value="قطر">🇶🇦 قطر</option>
+                <option value="عمان">🇴🇲 عمان</option>
+                <option value="البحرين">🇧🇭 البحرين</option>
+                <option value="الأردن">🇯🇴 الأردن</option>
+                <option value="لبنان">🇱🇧 لبنان</option>
+                <option value="العراق">🇮🇶 العراق</option>
+                <option value="فلسطين">🇵🇸 فلسطين</option>
+                <option value="سوريا">🇸🇾 سوريا</option>
+                <option value="المغرب">🇲🇦 المغرب</option>
+                <option value="الجزائر">🇩🇿 الجزائر</option>
+                <option value="تونس">🇹🇳 تونس</option>
+                <option value="ليبيا">🇱🇾 ليبيا</option>
+                <option value="السودان">🇸🇩 السودان</option>
+                <option value="اليمن">🇾🇪 اليمن</option>
+            </select>
+            
+            <input type="text" id="usernameInput" placeholder="👤 اسم المستخدم (فريد)" class="profile-input">
+            <div id="usernameError" class="error-message"></div>
+            
+            <button id="completeProfileBtn" class="profile-btn">🚀 ابدأ الآن</button>
         </div>
-        
-        <select id="countrySelect" class="profile-input">
-            <option value="">🌍 اختر الدولة</option>
-            <option value="السعودية">🇸🇦 السعودية</option>
-            <option value="مصر">🇪🇬 مصر</option>
-            <option value="الإمارات">🇦🇪 الإمارات</option>
-            <option value="الكويت">🇰🇼 الكويت</option>
-            <option value="قطر">🇶🇦 قطر</option>
-            <option value="عمان">🇴🇲 عمان</option>
-            <option value="البحرين">🇧🇭 البحرين</option>
-            <option value="الأردن">🇯🇴 الأردن</option>
-            <option value="لبنان">🇱🇧 لبنان</option>
-            <option value="العراق">🇮🇶 العراق</option>
-            <option value="فلسطين">🇵🇸 فلسطين</option>
-            <option value="سوريا">🇸🇾 سوريا</option>
-            <option value="المغرب">🇲🇦 المغرب</option>
-            <option value="الجزائر">🇩🇿 الجزائر</option>
-            <option value="تونس">🇹🇳 تونس</option>
-            <option value="ليبيا">🇱🇾 ليبيا</option>
-            <option value="السودان">🇸🇩 السودان</option>
-            <option value="اليمن">🇾🇪 اليمن</option>
-        </select>
-        
-        <input type="text" id="usernameInput" placeholder="👤 اسم المستخدم (فريد)" class="profile-input">
-        <div id="usernameError" class="error-message"></div>
-        
-        <button id="completeProfileBtn" class="profile-btn">🚀 ابدأ الآن</button>
     </div>
-</div>
+
     <!-- الواجهة الرئيسية للتطبيق -->
     <div id="appScreen" class="app-screen" style="display: none;">
         <!-- الشريط الجانبي -->
@@ -294,13 +294,32 @@
         </div>
     </div>
 
+    <!-- ========== ملفات JavaScript بالترتيب الصحيح ========== -->
+    <!-- 1. إعدادات Firebase -->
     <script src="firebase-config.js"></script>
+    
+    <!-- 2. الأدوات المساعدة -->
     <script src="scripts/utils.js"></script>
+    
+    <!-- 3. نظام المصادقة -->
     <script src="scripts/auth.js"></script>
+    
+    <!-- 4. نظام الدردشة -->
     <script src="scripts/chat.js"></script>
+    
+    <!-- 5. نظام الغرف -->
     <script src="scripts/rooms.js"></script>
+    
+    <!-- 6. نظام الأصدقاء -->
     <script src="scripts/friends.js"></script>
+    
+    <!-- 7. نظام الملف الشخصي -->
     <script src="scripts/profile.js"></script>
+    
+    <!-- 8. نظام الأدمن -->
+    <script src="scripts/admin.js"></script>
+    
+    <!-- 9. تشغيل التطبيق -->
     <script src="scripts/app.js"></script>
 </body>
 </html>
