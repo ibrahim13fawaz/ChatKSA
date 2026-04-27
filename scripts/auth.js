@@ -122,4 +122,128 @@ document.getElementById('facebookLoginBtn')?.addEventListener('click', async () 
     } finally {
         hideLoading();
     }
+});// إكمال الملف الشخصي
+document.getElementById('completeProfileBtn')?.addEventListener('click', async () => {
+    const selectedGenderElement = document.querySelector('.avatar-option.selected');
+    const selectedGender = selectedGenderElement?.dataset.gender;
+    const country = document.getElementById('countrySelect').value;
+    let username = document.getElementById('usernameInput').value.trim();
+    
+    if (!selectedGender) {
+        showError('❌ الرجاء اختيار الجنس (ذكر/أنثى)');
+        return;
+    }
+    if (!country) {
+        showError('❌ الرجاء اختيار الدولة');
+        return;
+    }
+    if (!username) {
+        showError('❌ الرجاء إدخال اسم المستخدم');
+        return;
+    }
+    if (username.length < 3) {
+        showError('❌ اسم المستخدم يجب أن يكون 3 أحرف على الأقل');
+        return;
+    }
+    
+    showLoading();
+    
+    const isUnique = await isUsernameUnique(username);
+    if (!isUnique) {
+        showError('❌ اسم المستخدم موجود بالفعل');
+        hideLoading();
+        return;
+    }
+    
+    const avatar = selectedGender === 'male' ? '👨' : '👩';
+    const userId = generateRandomId();
+    
+    const userData = {
+        uid: currentUser.uid,
+        username: username,
+        avatar: avatar,
+        gender: selectedGender,
+        country: country,
+        userId: userId,
+        level: 0,
+        xp: 0,
+        online: true,
+        lastSeen: firebase.database.ServerValue.TIMESTAMP,
+        friends: {},
+        requests: {},
+        badges: ['جديد'],
+        profileCompleted: true,
+        canChangeUsername: true,
+        bio: '',
+        dailyXP: {},
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    
+    try {
+        await database.ref(`users/${currentUser.uid}`).set(userData);
+        showSuccess('✅ تم إكمال الملف الشخصي بنجاح!');
+        currentUserData = userData;
+        await initializeApp();
+    } catch (error) {
+        showError('فشل إكمال الملف الشخصي: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+});
+
+// تسجيل الخروج
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+        showLoading();
+        try {
+            if (currentUser) {
+                updateUserStatus(currentUser.uid, false);
+            }
+            await auth.signOut();
+            showSuccess('تم تسجيل الخروج');
+        } catch (error) {
+            showError('فشل تسجيل الخروج');
+        } finally {
+            hideLoading();
+        }
+    }
+});
+
+// التبديل بين النماذج
+document.getElementById('showRegister')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+});
+
+document.getElementById('showLogin')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+});
+
+// التحقق المباشر من اسم المستخدم
+let usernameCheckTimeout;
+document.getElementById('usernameInput')?.addEventListener('input', async (e) => {
+    clearTimeout(usernameCheckTimeout);
+    const username = e.target.value.trim();
+    const errorDiv = document.getElementById('usernameError');
+    
+    if (username.length < 3) {
+        errorDiv.textContent = '⚠️ اسم المستخدم يجب أن يكون 3 أحرف على الأقل';
+        return;
+    }
+    
+    errorDiv.textContent = '🔄 جاري التحقق...';
+    
+    usernameCheckTimeout = setTimeout(async () => {
+        const isUnique = await isUsernameUnique(username);
+        if (!isUnique) {
+            errorDiv.textContent = '❌ اسم المستخدم موجود بالفعل';
+            errorDiv.style.color = '#ef4444';
+        } else {
+            errorDiv.textContent = '✅ اسم المستخدم متاح';
+            errorDiv.style.color = '#10b981';
+        }
+    }, 500);
 });
