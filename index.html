@@ -67,24 +67,19 @@
     <!-- شاشة إكمال الملف الشخصي -->
     <div id="completeProfileScreen" class="complete-profile-screen" style="display: none;">
         <div class="profile-container">
-            <h2>✨ مرحباً بك!</h2>
-            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
-                أكمل بياناتك للبدء
-            </p>
-            
+            <h2>أكمل ملفك الشخصي</h2>
             <div class="avatar-selection">
                 <div class="avatar-option" data-gender="male">
                     <i class="fas fa-user-astronaut"></i>
-                    <span>ذكر 👨</span>
+                    <span>ذكر</span>
                 </div>
                 <div class="avatar-option" data-gender="female">
                     <i class="fas fa-user-ninja"></i>
-                    <span>أنثى 👩</span>
+                    <span>أنثى</span>
                 </div>
             </div>
-            
             <select id="countrySelect" class="profile-input">
-                <option value="">🌍 اختر الدولة</option>
+                <option value="">اختر الدولة</option>
                 <option value="السعودية">🇸🇦 السعودية</option>
                 <option value="مصر">🇪🇬 مصر</option>
                 <option value="الإمارات">🇦🇪 الإمارات</option>
@@ -104,11 +99,9 @@
                 <option value="السودان">🇸🇩 السودان</option>
                 <option value="اليمن">🇾🇪 اليمن</option>
             </select>
-            
-            <input type="text" id="usernameInput" placeholder="👤 اسم المستخدم (فريد)" class="profile-input">
+            <input type="text" id="usernameInput" placeholder="اسم المستخدم (فريد)" class="profile-input">
             <div id="usernameError" class="error-message"></div>
-            
-            <button id="completeProfileBtn" class="profile-btn">🚀 ابدأ الآن</button>
+            <button id="completeProfileBtn" class="profile-btn">متابعة</button>
         </div>
     </div>
 
@@ -294,50 +287,13 @@
         </div>
     </div>
 
-    <!-- ========== ملفات JavaScript بالترتيب الصحيح ========== -->
-    <!-- 1. إعدادات Firebase -->
     <script src="firebase-config.js"></script>
-    
-    <!-- 2. الأدوات المساعدة -->
     <script src="scripts/utils.js"></script>
-    
-    <!-- 3. نظام المصادقة -->
     <script src="scripts/auth.js"></script>
-    
-    <!-- 4. نظام الدردشة -->
     <script src="scripts/chat.js"></script>
-    
-    <!-- 5. نظام الغرف -->
     <script src="scripts/rooms.js"></script>
-    
-    <!-- 6. نظام الأصدقاء -->
     <script src="scripts/friends.js"></script>
-    
-    <!-- 7. نظام الملف الشخصي -->
     <script src="scripts/profile.js"></script>
-    
-    <!-- 8. نظام الأدمن -->
-    <script src="scripts/admin.js"></script>
-    
-    <!-- 9. تشغيل التطبيق -->
     <script src="scripts/app.js"></script>
-<script>
-    // تصحيح الأخطاء
-    window.addEventListener('error', function(e) {
-        console.error('❌ خطأ:', e.message);
-        alert('خطأ في التطبيق: ' + e.message + '\nتحقق من Console للمزيد');
-    });
-    
-    // التحقق من Firebase
-    setTimeout(function() {
-        if (typeof firebase === 'undefined') {
-            alert('❌ Firebase لم يتم تحميله! تأكد من اتصال الإنترنت');
-        } else if (typeof database === 'undefined') {
-            alert('❌ قاعدة البيانات لم يتم تهيئتها! تأكد من ملف firebase-config.js');
-        } else {
-            console.log('✅ Firebase جاهز للعمل');
-        }
-    }, 1000);
-</script>
 </body>
 </html>
