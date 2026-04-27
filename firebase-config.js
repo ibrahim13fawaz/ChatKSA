@@ -1,12 +1,13 @@
 // تكوين Firebase - استبدل هذه البيانات بمشروعك الخاص
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DATABASE_URL",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCXA1x9fJe6zPFo7yiK1kSRsoR89aSff5k",
+  authDomain: "itchat-web-8c4ed.firebaseapp.com",
+  databaseURL: "https://itchat-web-8c4ed-default-rtdb.firebaseio.com",
+  projectId: "itchat-web-8c4ed",
+  storageBucket: "itchat-web-8c4ed.firebasestorage.app",
+  messagingSenderId: "787261764804",
+  appId: "1:787261764804:web:7af9a924d03989b1dbc591",
+  measurementId: "G-1KPE5B71QR"
 };
 
 // تهيئة Firebase
