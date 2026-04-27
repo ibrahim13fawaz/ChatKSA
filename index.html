@@ -321,5 +321,23 @@
     
     <!-- 9. تشغيل التطبيق -->
     <script src="scripts/app.js"></script>
+<script>
+    // تصحيح الأخطاء
+    window.addEventListener('error', function(e) {
+        console.error('❌ خطأ:', e.message);
+        alert('خطأ في التطبيق: ' + e.message + '\nتحقق من Console للمزيد');
+    });
+    
+    // التحقق من Firebase
+    setTimeout(function() {
+        if (typeof firebase === 'undefined') {
+            alert('❌ Firebase لم يتم تحميله! تأكد من اتصال الإنترنت');
+        } else if (typeof database === 'undefined') {
+            alert('❌ قاعدة البيانات لم يتم تهيئتها! تأكد من ملف firebase-config.js');
+        } else {
+            console.log('✅ Firebase جاهز للعمل');
+        }
+    }, 1000);
+</script>
 </body>
 </html>
