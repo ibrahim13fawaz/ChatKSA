@@ -1,0 +1,13 @@
+/project
+├── index.html
+├── style.css
+├── firebase-config.js
+├── /scripts
+│   ├── auth.js
+│   ├── chat.js
+│   ├── rooms.js
+│   ├── friends.js
+│   ├── profile.js
+│   └── utils.js
+└── /assets
+    └── /icons
